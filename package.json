@@ -1,14 +1,13 @@
 {
   "name": "mjml-builder_test",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "GrapesJS MJML Email Editor (Codespaces-ready)",
+  "private": true,
   "scripts": {
-    "build:vendor": "mkdir -p vendor/grapesjs && cp node_modules/grapesjs/dist/grapes.min.js vendor/grapesjs/grapes.min.js && cp node_modules/grapesjs/dist/css/grapes.min.css vendor/grapesjs/grapes.min.css && node -e \"console.log(require.resolve('grapesjs-mjml'))\" | xargs -I{} npx esbuild {} --bundle --format=iife --global-name=grapesjsMjml --external:grapesjs --define:process.env.NODE_ENV=\\\"'production'\\\" --outfile=vendor/grapesjs-mjml.umd.js",
-    "serve": "python server.py"
+    "build:vendor": "bash scripts/build_vendor.sh",
+    "serve": "python3 server.py",
+    "dev": "npm run build:vendor && npm run serve"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "grapesjs": "^0.22.13",
     "grapesjs-mjml": "^1.0.7",
@@ -18,5 +17,5 @@
   "devDependencies": {
     "esbuild": "^0.25.10"
   },
-  "description": ""
+  "license": "MIT"
 }
