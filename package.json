@@ -1,0 +1,21 @@
+{
+  "name": "mjml-builder_test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "grapesjs": "^0.22.13",
+    "grapesjs-mjml": "^1.0.7",
+    "lodash": "^4.17.21",
+    "mjml-browser": "^4.16.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.10"
+  },
+  "description": ""
+}
