@@ -1,5 +1,4 @@
 from http.server import SimpleHTTPRequestHandler, HTTPServer
-
 class Handler(SimpleHTTPRequestHandler):
     extensions_map = {
         **SimpleHTTPRequestHandler.extensions_map,
@@ -7,5 +6,4 @@ class Handler(SimpleHTTPRequestHandler):
         ".mjs": "application/javascript",
         "": "application/octet-stream",
     }
-
 HTTPServer(("0.0.0.0", 5173), Handler).serve_forever()

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:vendor": "mkdir -p vendor/grapesjs && cp node_modules/grapesjs/dist/grapes.min.js vendor/grapesjs/grapes.min.js && cp node_modules/grapesjs/dist/css/grapes.min.css vendor/grapesjs/grapes.min.css && node -e \"console.log(require.resolve('grapesjs-mjml'))\" | xargs -I{} npx esbuild {} --bundle --format=iife --global-name=grapesjsMjml --external:grapesjs --define:process.env.NODE_ENV=\\\"'production'\\\" --outfile=vendor/grapesjs-mjml.umd.js",
+    "serve": "python server.py"
   },
   "keywords": [],
   "author": "",
@@ -12,7 +13,7 @@
     "grapesjs": "^0.22.13",
     "grapesjs-mjml": "^1.0.7",
     "lodash": "^4.17.21",
-    "mjml-browser": "^4.16.1"
+    "mjml-browser": "^4.14.1"
   },
   "devDependencies": {
     "esbuild": "^0.25.10"
