@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1, viewport-fit=cover" />
+  <title>Vanilla GrapesJS + MJML</title>
+  <link rel="stylesheet" href="https://unpkg.com/grapesjs/dist/css/grapes.min.css" />
+  <style>
+    html, body { height: 100%; margin: 0; }
+    #gjs { height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="gjs"></div>
+
+  <!-- Official GrapesJS -->
+  <script src="https://unpkg.com/grapesjs@0.22.13/dist/grapes.min.js"></script>
+
+  <!-- Official grapesjs-mjml UMD from the GrapesJS/mjml repo releases -->
+  <script src="https://unpkg.com/grapesjs-mjml@1.0.7/dist/index.umd.js"></script>
+
+  <script>
+    // Head-free starter (avoid <mj-head> so canvas never errors)
+    const STARTER = `
+<mjml>
+  <mj-body background-color="#f4f4f4">
+    <mj-section background-color="#ffffff">
+      <mj-column>
+        <mj-text align="center" font-size="22px" font-weight="700">Hello MJML</mj-text>
+        <mj-divider border-color="#e5e5e5" />
+        <mj-text>Vanilla GrapesJS + MJML setup.</mj-text>
+        <mj-button href="https://example.com">Call to action</mj-button>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>`.trim();
+
+    // Clean start: do NOT autoload saved projects
+    localStorage.removeItem('mjml-editor-project');
+    localStorage.removeItem('gjs-project-mjml-editor-project');
+
+    const editor = grapesjs.init({
+      container: '#gjs',
+      height: '100%',
+      fromElement: false,
+
+      // Vanilla devices; plugin won’t override (resetDevices:false)
+      deviceManager: {
+        devices: [
+          { id: 'Desktop', name: 'Desktop', width: '' },
+          { id: 'Tablet',  name: 'Tablet',  width: '620px' },
+          { id: 'Mobile',  name: 'Mobile',  width: '320px' },
+        ],
+      },
+
+      // Keep stock storage off so nothing stale loads
+      storageManager: {
+        type: 'local',
+        autosave: false,
+        autoload: false,
+        options: { local: { key: 'mjml-editor-project' } },
+      },
+
+      plugins: ['grapesjs-mjml'],
+      pluginsOpts: {
+        'grapesjs-mjml': {
+          importPlaceholder: STARTER,
+          resetDevices: false,      // IMPORTANT: keep our device IDs working
+          resetStyleManager: true,
+          overwriteExport: true,    // default Export modal (MJML + compiled HTML)
+        }
+      },
+    });
+
+    // Seed the canvas with our head-free template
+    editor.on('load', () => {
+      editor.setComponents(STARTER);
+
+      // OPTIONAL: add tiny device buttons using stock Panels (vanilla look preserved)
+      const pn = editor.Panels;
+      pn.addPanel({ id: 'devices' });
+      pn.addButton('devices', [
+        { id: 'dev-desktop', label: 'Desktop', command: () => editor.setDevice('Desktop') },
+        { id: 'dev-tablet',  label: 'Tablet',  command: () => editor.setDevice('Tablet')  },
+        { id: 'dev-mobile',  label: 'Mobile',  command: () => editor.setDevice('Mobile')  },
+      ]);
+
+      // Hide Head blocks from the Blocks sidebar (keep UI clean & vanilla-feeling)
+      const bm = editor.BlockManager;
+      ['mj-attributes','mj-style','mj-font','mj-preview'/*,'mj-raw'*/].forEach(id => { try { bm.remove(id); } catch(e){} });
+    });
+  </script>
+</body>
+</html>
