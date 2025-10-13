@@ -1,17 +1,106 @@
-:root{
-  --brand-color:#086bd4;
-  --brand-font: 'Aptos', Arial, Helvetica, sans-serif;
-  --brand-spacing:16px;
+:root {
+  --brand-color: #086bd4;
+  --brand-font: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
+    'Helvetica Neue', Arial, sans-serif;
+  --brand-spacing: 16px;
+  --bg-body: #0f172a;
+  --bg-canvas: #0f172a;
+  --panel-bg: #111827;
+  --panel-border: #1f2937;
+  --panel-text: #e2e8f0;
+  --accent: #3b82f6;
 }
 
-html, body { height: 100%; }
-body { font-family: var(--brand-font); }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 
-.gjs-one-bg{ background:#111; }
-.gjs-two-color{ color:#ddd; }
-.gjs-three-bg{ background:#1d1d1d; }
-.gjs-four-color{ color:#fff; }
-.gjs-pn-btn{ border-radius:8px; }
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--brand-font);
+  background: var(--bg-body);
+  color: var(--panel-text);
+}
 
 /* Canvas background color (email stage) */
-#gjs { background:#0f172a; }
+#gjs {
+  height: 100vh;
+  background: var(--bg-canvas);
+}
+
+.gjs-one-bg {
+  background: var(--panel-bg);
+}
+
+.gjs-two-color {
+  color: #cbd5f5;
+}
+
+.gjs-three-bg {
+  background: #1e293b;
+}
+
+.gjs-four-color {
+  color: #f8fafc;
+}
+
+.gjs-pn-panel {
+  border: none;
+}
+
+.gjs-pn-buttons {
+  gap: 4px;
+}
+
+.gjs-pn-btn {
+  border-radius: 6px;
+}
+
+.gjs-pn-btn.gjs-pn-active,
+.gjs-pn-btn:hover {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: var(--accent);
+}
+
+.gjs-block {
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: #1e293b;
+  color: var(--panel-text);
+}
+
+.gjs-block:hover {
+  border-color: var(--accent);
+}
+
+.gjs-block-category.gjs-open > .gjs-block-category-title {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.gjs-block-category-title {
+  border-radius: 6px;
+}
+
+.gjs-layer.gjs-selected > .gjs-layer-title {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: var(--accent);
+}
+
+.gjs-cv-canvas,
+.gjs-frame {
+  background: transparent;
+}
+
+@media (max-width: 768px) {
+  #gjs {
+    height: auto;
+    min-height: 100vh;
+  }
+}
