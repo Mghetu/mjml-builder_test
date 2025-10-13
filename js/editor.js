@@ -11,7 +11,11 @@
       devices: [
         { name: 'Desktop', width: '' },
         { name: 'Tablet', width: '768px' },
-        { name: 'Mobile', width: '375px' }
+        {
+          name: 'Mobile portrait',
+          width: '375px',
+          widthMedia: '480px'
+        }
       ]
     }
   });
