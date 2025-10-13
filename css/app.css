@@ -106,11 +106,8 @@ body {
   box-sizing: border-box;
 }
 
-.custom-left-sidebar__section--blocks .gjs-blocks-cs,
-.custom-left-sidebar__section--blocks .gjs-blocks-c {
+.custom-left-sidebar__section--blocks .gjs-blocks-cs {
   flex: 1;
-  display: flex;
-  flex-direction: column;
   min-height: 0;
 }
 
@@ -121,7 +118,22 @@ body {
 }
 
 .custom-left-sidebar__section--blocks .gjs-blocks-c {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-height: 0;
+  padding-right: 4px;
   overflow-y: auto;
+}
+
+.custom-left-sidebar__section--blocks .gjs-block {
+  width: 100%;
+  margin: 0;
+}
+
+.custom-left-sidebar__section--blocks .gjs-block__wrapper {
+  height: 100%;
 }
 
 .custom-left-sidebar__section--layers .gjs-layers {
