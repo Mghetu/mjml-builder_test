@@ -22,25 +22,25 @@ window.SampleTemplates = {
 <mjml>
   <mj-head>
     <mj-attributes>
-      <mj-all font-family="\${Theme.fontFamily}" />
+      <mj-all font-family="${Theme.fontFamily}" />
       <mj-text font-size="14px" color="#222222" />
-      <mj-button background-color="\${Theme.brandColor}" color="#ffffff" border-radius="4px" />
+      <mj-button background-color="${Theme.brandColor}" color="#ffffff" border-radius="4px" />
       <mj-image padding="0" />
     </mj-attributes>
     <mj-style>
-      .legal a { color: \${Theme.brandColor}; text-decoration: underline; }
+      .legal a { color: ${Theme.brandColor}; text-decoration: underline; }
     </mj-style>
   </mj-head>
   <mj-body background-color="#f4f5f7">
     <mj-section background-color="#ffffff" padding="24px 16px">
       <mj-column>
-        <mj-image src="\${Theme.logoUrl}" alt="Logo" width="140px" />
+        <mj-image src="${Theme.logoUrl}" alt="Logo" width="140px" />
       </mj-column>
     </mj-section>
 
     <mj-section background-color="#ffffff" padding="0 16px 24px">
       <mj-column>
-        <mj-image src="\${DATA_HERO}" alt="Hero" />
+        <mj-image src="${DATA_HERO}" alt="Hero" />
         <mj-text font-size="22px" font-weight="700" padding-top="16px">What’s New in Our Product</mj-text>
         <mj-text>Discover new features that boost your workflow.</mj-text>
         <mj-button href="https://example.com">Read the full update</mj-button>
@@ -82,15 +82,15 @@ window.SampleTemplates = {
 <mjml>
   <mj-head>
     <mj-attributes>
-      <mj-all font-family="\${Theme.fontFamily}" />
+      <mj-all font-family="${Theme.fontFamily}" />
       <mj-text font-size="14px" color="#222222" />
-      <mj-button background-color="\${Theme.brandColor}" color="#ffffff" border-radius="4px" />
+      <mj-button background-color="${Theme.brandColor}" color="#ffffff" border-radius="4px" />
     </mj-attributes>
   </mj-head>
   <mj-body background-color="#f4f5f7">
     <mj-section background-color="#ffffff" padding="24px 16px">
       <mj-column>
-        <mj-image src="\${Theme.logoUrl}" alt="Logo" width="140px" />
+        <mj-image src="${Theme.logoUrl}" alt="Logo" width="140px" />
       </mj-column>
     </mj-section>
 
@@ -108,14 +108,14 @@ window.SampleTemplates = {
         <mj-text>AI workflows, consultant mindset, and EQ readiness.</mj-text>
       </mj-column>
       <mj-column width="34%">
-        <mj-image src="\${DATA_HERO}" alt="Speakers" />
+        <mj-image src="${DATA_HERO}" alt="Speakers" />
       </mj-column>
     </mj-section>
 
     <mj-section padding="16px">
       <mj-column>
         <mj-text font-size="12px" color="#6b7280">
-          © 2025 Company. <a href="#" style="color:\${Theme.brandColor};">Privacy</a>
+          © 2025 Company. <a href="#" style="color:${Theme.brandColor};">Privacy</a>
         </mj-text>
       </mj-column>
     </mj-section>
