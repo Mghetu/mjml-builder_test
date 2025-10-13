@@ -4,17 +4,21 @@
     fromElement: false,
     height: '100%',
     storageManager: false,
-    // IMPORTANT: correct plugin id and it must load after GrapesJS script
     plugins: ['grapesjs-mjml'],
     pluginsOpts: { 'grapesjs-mjml': {} },
     canvas: { styles: [], scripts: [] },
     deviceManager: {
       devices: [
         { name: 'Desktop', width: '' },
-        { name: 'Tablet',  width: '768px' },
-        { name: 'Mobile',  width: '375px' }
+        { name: 'Tablet', width: '768px' },
+        { name: 'Mobile', width: '375px' }
       ]
     }
+  });
+
+  editor.on('load', () => {
+    const openBlocks = editor.Panels.getButton('views', 'open-blocks');
+    if (openBlocks) openBlocks.set('active', 1);
   });
 
   // Panel buttons
@@ -78,7 +82,8 @@
       container.querySelector('#impBtn').onclick = async () => {
         const mjml = container.querySelector('#impMjml').value;
         if (!mjml) return;
-        editor.DomComponents.getWrapper().set('content', mjml);
+        editor.setComponents(mjml);
+        editor.render();
         modal.close();
       };
     }
@@ -197,6 +202,7 @@ bm.add('legal-footer', {
       editor.render();
     } else {
       editor.setComponents(SampleTemplates.productNewsletter.mjml);
+      editor.render();
     }
   })();
 
