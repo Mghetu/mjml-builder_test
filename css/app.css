@@ -17,3 +17,15 @@ body {
   background: transparent !important;
   box-shadow: none !important;
 }
+
+.gjs-blocks-c .gjs-block__media svg,
+.gjs-blocks-c .gjs-block__media img {
+  display: block;
+  max-width: 60%;
+  max-height: 60%;
+  margin: 0 auto;
+}
+
+.gjs-blocks-c .gjs-block__media {
+  background-size: 60% !important;
+}
