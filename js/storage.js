@@ -1,27 +1,30 @@
-// StorageProvider interface and LocalProvider implementation
+// StorageProvider interface and LocalProvider implementation (localStorage with IndexedDB fallback)
 (function(){
   const KEY = 'mjml_studio_project_v1';
 
   const LocalProvider = {
-    async save(json){
+    async save(data){
       try {
-        localStorage.setItem(KEY, JSON.stringify(json));
-        return { ok: true };
+        // data can be project json or a custom object; we persist as-is
+        localStorage.setItem(KEY, JSON.stringify(data));
+        return { ok: true, where: 'localStorage' };
       } catch(e){
         if (window.idbKeyval){
-          await idbKeyval.set(KEY, json);
-          return { ok: true, where: 'indexeddb' };
+          await idbKeyval.set(KEY, data);
+          return { ok: true, where: 'indexedDB' };
         }
         return { ok:false, error: e.message };
       }
     },
     async load(){
-      const raw = localStorage.getItem(KEY);
-      if (raw) return JSON.parse(raw);
-      if (window.idbKeyval){
-        const v = await idbKeyval.get(KEY);
-        if (v) return v;
-      }
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (raw) return JSON.parse(raw);
+        if (window.idbKeyval){
+          const v = await idbKeyval.get(KEY);
+          if (v) return v;
+        }
+      } catch(_) {}
       return null;
     },
     async clear(){

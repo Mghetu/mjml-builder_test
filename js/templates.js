@@ -1,4 +1,20 @@
-// Two sample templates (MJML)
+// Data-URI placeholder image to satisfy CSP (img-src 'self' data:)
+const DATA_HERO = "data:image/svg+xml;utf8," + encodeURIComponent(`
+  <svg xmlns='http://www.w3.org/2000/svg' width='800' height='300'>
+    <defs>
+      <linearGradient id='g' x1='0' x2='1'>
+        <stop offset='0%' stop-color='#086bd4'/>
+        <stop offset='100%' stop-color='#4f46e5'/>
+      </linearGradient>
+    </defs>
+    <rect width='800' height='300' fill='url(#g)'/>
+    <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle'
+      font-family='Arial, Helvetica, sans-serif' font-size='36' fill='#fff'>
+      Hero Placeholder
+    </text>
+  </svg>
+`);
+
 window.SampleTemplates = {
   productNewsletter: {
     name: 'Product Newsletter',
@@ -24,7 +40,7 @@ window.SampleTemplates = {
 
     <mj-section background-color="#ffffff" padding="0 16px 24px">
       <mj-column>
-        <mj-image src="https://via.placeholder.com/800x300" alt="Hero" />
+        <mj-image src="\${DATA_HERO}" alt="Hero" />
         <mj-text font-size="22px" font-weight="700" padding-top="16px">What’s New in Our Product</mj-text>
         <mj-text>Discover new features that boost your workflow.</mj-text>
         <mj-button href="https://example.com">Read the full update</mj-button>
@@ -56,7 +72,8 @@ window.SampleTemplates = {
       </mj-column>
     </mj-section>
   </mj-body>
-</mjml>`.trim()
+</mjml>
+`.trim()
   },
 
   eventAnnouncement: {
@@ -91,7 +108,7 @@ window.SampleTemplates = {
         <mj-text>AI workflows, consultant mindset, and EQ readiness.</mj-text>
       </mj-column>
       <mj-column width="34%">
-        <mj-image src="https://via.placeholder.com/300x200" alt="Speakers" />
+        <mj-image src="\${DATA_HERO}" alt="Speakers" />
       </mj-column>
     </mj-section>
 
@@ -103,6 +120,7 @@ window.SampleTemplates = {
       </mj-column>
     </mj-section>
   </mj-body>
-</mjml>`.trim()
+</mjml>
+`.trim()
   }
 };

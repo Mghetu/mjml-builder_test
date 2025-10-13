@@ -3,9 +3,15 @@
   --brand-font: 'Aptos', Arial, Helvetica, sans-serif;
   --brand-spacing:16px;
 }
+
+html, body { height: 100%; }
 body { font-family: var(--brand-font); }
+
 .gjs-one-bg{ background:#111; }
 .gjs-two-color{ color:#ddd; }
 .gjs-three-bg{ background:#1d1d1d; }
 .gjs-four-color{ color:#fff; }
 .gjs-pn-btn{ border-radius:8px; }
+
+/* Canvas background color (email stage) */
+#gjs { background:#0f172a; }
