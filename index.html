@@ -1,194 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>MJML Email Editor — GrapesJS</title>
+  <title>MJML Studio (GrapesJS)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="./vendor/grapesjs/grapes.min.css" />
-  <style>
-    :root{ --bar-h:44px; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
-    html,body{height:100%;margin:0}
-    body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#0f1115;color:#dfe3ea}
-    #topbar{height:var(--bar-h);display:flex;align-items:center;gap:.5rem;padding:0 .75rem;border-bottom:1px solid #232634;background:linear-gradient(180deg,#141724 0%,#0f1115 100%);position:sticky;top:0;z-index:9}
-    #title{font-weight:600;letter-spacing:.2px}
-    #status{margin-left:auto;font:12px/1.2 var(--mono);opacity:.9}
-    #gjs{height:calc(100vh - var(--bar-h));border-top:1px solid #1c2030;background:#0f1115}
-    .btn{appearance:none;border:1px solid #2a3246;background:#171a26;color:#e7ecf3;padding:.45rem .7rem;border-radius:.55rem;font-weight:600;font-size:.9rem;cursor:pointer;transition:.15s}
-    .btn:hover{background:#1b2030;border-color:#3a435c}
-    .btn:active{transform:translateY(1px)}
-    .btn-ghost{background:transparent;border-color:transparent;color:#a9b3c7}
-    .btn-ghost:hover{background:#161a24;border-color:#2a3246;color:#e7ecf3}
-    .seg{display:inline-flex;gap:4px;background:#121622;border:1px solid #2a3246;border-radius:.55rem;padding:2px}
-    .seg .btn{border:none;background:transparent;padding:.35rem .55rem}
-    .seg .btn.active{background:#1b2030;border-radius:.45rem}
-    /* GrapesJS dark tweaks */
-    .gjs-editor,.gjs-cv-canvas{background:#111318}
-    .gjs-block-category{background:#0e1118;color:#c4cada}
-    .gjs-one-bg{background-color:#0f1115}
-    .gjs-two-color{color:#cbd3e3}
-    .gjs-three-bg{background-color:#1a1f2e}
-    .gjs-four-color{color:#9aa3b7}
-  </style>
+
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' https://cdn.jsdelivr.net https://unpkg.com;
+    style-src 'self' https://cdn.jsdelivr.net https://unpkg.com 'unsafe-inline';
+    img-src 'self' data:;
+    font-src 'self' https://cdn.jsdelivr.net https://unpkg.com;
+    connect-src 'self';
+    object-src 'none';
+    base-uri 'self';
+    frame-ancestors 'none';
+    upgrade-insecure-requests;
+  ">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/normalize.css@8.0.1/normalize.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/grapesjs@0.21.6/dist/css/grapes.min.css">
+  <link rel="stylesheet" href="css/app.css">
+
+  <!-- GrapesJS + MJML plugin -->
+  <script defer src="https://cdn.jsdelivr.net/npm/grapesjs@0.21.6/dist/grapes.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/grapesjs-mjml@0.1.16/dist/grapesjs-mjml.min.js"></script>
+
+  <!-- MJML browser build (client-only compilation) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/mjml-browser@4.15.3/dist/mjml-browser.js"></script>
+
+  <!-- Optional IndexedDB helper -->
+  <script defer src="https://cdn.jsdelivr.net/npm/idb-keyval@6.2.1/dist/idb-keyval.iife.min.js"></script>
+
+  <!-- App scripts -->
+  <script defer src="js/themes.js"></script>
+  <script defer src="js/storage.js"></script>
+  <script defer src="js/imageStore.js"></script>
+  <script defer src="js/compile.js"></script>
+  <script defer src="js/templates.js"></script>
+  <script defer src="js/editor.js"></script>
 </head>
 <body>
-  <div id="topbar">
-    <span id="title">📬 MJML Email Editor</span>
-    <div class="seg" id="devices">
-      <button class="btn" data-dev="Desktop">Desktop</button>
-      <button class="btn" data-dev="Tablet">Tablet</button>
-      <button class="btn" data-dev="Mobile">Mobile</button>
-    </div>
-    <button id="btn-export-html" class="btn">Export HTML</button>
-    <button id="btn-download-html" class="btn">Download HTML</button>
-    <button id="btn-reset" class="btn btn-ghost" title="Reset to starter MJML">Reset</button>
-    <span id="status">Booting…</span>
-  </div>
-
-  <!-- MJML content in DOM; parsed with fromElement:true -->
-  <div id="gjs">
-    <mjml>
-      <mj-head>
-        <mj-attributes>
-          <mj-all font-family="Inter, Arial, sans-serif" />
-          <mj-text font-size="16px" color="#1f2937" />
-          <mj-section padding="0px" />
-          <mj-column padding="0px" />
-        </mj-attributes>
-        <mj-title>Welcome</mj-title>
-        <mj-preview>Quick starter</mj-preview>
-      </mj-head>
-      <mj-body background-color="#f3f4f6">
-        <mj-section>
-          <mj-column>
-            <mj-image width="120px" src="https://dummyimage.com/240x120/111/fff&text=Logo" alt="Logo" />
-          </mj-column>
-        </mj-section>
-        <mj-section background-color="#ffffff" padding="24px">
-          <mj-column>
-            <mj-text font-size="22px" font-weight="700">Hello 👋</mj-text>
-            <mj-text>Build MJML emails visually with GrapesJS. Export compiled HTML when you’re done.</mj-text>
-            <mj-button background-color="#111827" color="#ffffff" padding="12px 20px" href="https://grapesjs.com">Open docs</mj-button>
-          </mj-column>
-        </mj-section>
-        <mj-section>
-          <mj-column>
-            <mj-text align="center" color="#6b7280" font-size="12px">You’re receiving this because you opted in.</mj-text>
-          </mj-column>
-        </mj-section>
-      </mj-body>
-    </mjml>
-  </div>
-
-  <!-- Local vendor assets built by scripts/build_vendor.sh -->
-  <script src="./vendor/grapesjs/grapes.min.js"></script>
-  <script src="./vendor/grapesjs-mjml.min.js"></script>
-  <script src="./vendor/mjml-browser/mjml-browser.js"></script>
-
-  <script>
-    // --------- small helpers ----------
-    const $ = s => document.querySelector(s);
-    const log = (...a) => console.log('[MJML-Editor]', ...a);
-    function setStatus(t, ok = true){ const s = $('#status'); s.textContent = t; s.style.color = ok ? '#a6f4c5' : '#ffb4b4'; }
-    function injectCss(html, css){
-      if (!css) return html;
-      const style = `<style>${css}</style>`;
-      return html.includes('</head>') ? html.replace('</head>', style + '</head>') : (style + '\n' + html);
-    }
-    function download(name, data, type='text/html;charset=utf-8'){
-      const blob = new Blob([data], { type });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
-      URL.revokeObjectURL(url);
-    }
-
-    (function boot(){
-      // Use plugin function if esbuild exposed window.grapesjsMjml; else use registered name
-      const pluginFn = window.grapesjsMjml;
-      const plugins = pluginFn ? [pluginFn] : ['grapesjs-mjml'];
-
-      const editor = grapesjs.init({
-        container: '#gjs',
-        fromElement: true,                 // parse MJML in #gjs
-        height: '100%',
-        storageManager: false,
-        canvas: { styles: [], scripts: [] },
-        plugins,
-        pluginsOpts: {
-          'grapesjs-mjml': {
-            resetBlocks: true,
-            resetDevices: true,
-            imagePlaceholderSrc: 'https://via.placeholder.com/600x300/111827/ffffff?text=Image'
-          }
-        },
-        deviceManager: {
-          devices: [
-            { id:'Desktop', name:'Desktop', width:'' },
-            { id:'Tablet',  name:'Tablet',  width:'768px' },
-            { id:'Mobile',  name:'Mobile',  width:'420px' }
-          ]
-        }
-      });
-
-      // Open Block Manager so DnD is visible immediately
-      editor.on('load', () => {
-        const bmBtn = editor.Panels.getButton('views', 'open-blocks');
-        if (bmBtn) bmBtn.set('active', true);
-        setStatus('Ready ✓');
-      });
-
-      // Device buttons
-      const devBtns = Array.from($('#devices').querySelectorAll('.btn'));
-      const setActive = id => devBtns.forEach(b => b.classList.toggle('active', b.dataset.dev === id));
-      devBtns.forEach(btn => btn.addEventListener('click', () => {
-        const id = btn.dataset.dev;
-        editor.setDevice(id);
-        setActive(id);
-      }));
-      editor.setDevice('Desktop'); setActive('Desktop');
-
-      // Export
-      $('#btn-export-html').addEventListener('click', () => {
-        try {
-          const html = editor.getHtml({ cleanId:true });
-          const css  = editor.getCss({ avoidProtected:true });
-          const full = injectCss(html, css);
-          editor.Modal.open({
-            title: 'Exported HTML',
-            content: `<textarea style="width:100%;height:60vh;font:12px/1.4 var(--mono);background:#0f1115;color:#e7ecf3;border:1px solid #2a3246;border-radius:8px;padding:12px;">${full.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</textarea>`
-          });
-        } catch (e) {
-          console.error(e); setStatus('Export failed — see console', false);
-        }
-      });
-
-      // Download
-      $('#btn-download-html').addEventListener('click', () => {
-        try {
-          const html = editor.getHtml({ cleanId:true });
-          const css  = editor.getCss({ avoidProtected:true });
-          download('email.html', injectCss(html, css));
-          setStatus('Downloaded email.html');
-        } catch (e) {
-          console.error(e); setStatus('Download failed — see console', false);
-        }
-      });
-
-      // Reset (restore initial MJML from DOM)
-      $('#btn-reset').addEventListener('click', () => {
-        try {
-          const initial = document.querySelector('#gjs').innerHTML;
-          editor.setComponents(''); // clear
-          editor.setComponents(initial);
-          setStatus('Reset to starter MJML');
-        } catch (e) {
-          console.error('Reset failed', e);
-          setStatus('Reset failed — see console', false);
-        }
-      });
-    })();
-  </script>
+  <div id="gjs" style="height:100vh; overflow:hidden;"></div>
 </body>
 </html>
-
