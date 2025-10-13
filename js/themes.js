@@ -1,4 +1,4 @@
-// Simple theming tokens
+// Simple theming tokens (can be adjusted later or made user-editable)
 window.Theme = {
   brandColor: '#086bd4',
   fontFamily: 'Aptos, Arial, Helvetica, sans-serif',
