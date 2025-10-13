@@ -1,125 +1,201 @@
-<!DOCTYPE html>
-<!--
-  index.html
-
-  This is the entry point for the GrapesJS‑based MJML email builder.  The page
-  loads the core GrapesJS library and the MJML plugin directly
-  from public CDNs.  These scripts are version‑pinned to stable releases
-  verified to exist on the chosen CDNs.  See README.md for details.
-
-  The editor itself is bootstrapped in assets/js/main.js where plugins are
-  configured, the canvas is styled, and custom blocks and export commands are
-  registered.
--->
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GrapesJS MJML Editor</title>
-
-    <!--
-      GrapesJS core library – latest stable version (0.22.12).
-      Loaded from jsDelivr CDN.  This library exposes the global `grapesjs`
-      object used to initialise the editor.
-    -->
-    <script src="https://cdn.jsdelivr.net/npm/grapesjs@0.22.12/dist/grapes.min.js"></script>
-
-    <!--
-      GrapesJS core styles.  Without this stylesheet the editor UI has no
-      default styling and appears broken.  Always include the matching
-      version of `grapes.min.css` alongside `grapes.min.js`.
-    -->
+    <meta charset="utf-8" />
+    <title>GrapesJS MJML Plugin</title>
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/grapesjs@0.22.12/dist/css/grapes.min.css"
+      href="https://unpkg.com/grapesjs/dist/css/grapes.min.css"
     />
-
-    <!--
-      GrapesJS MJML plugin (v1.0.7).
-      This plugin registers a preset that adds MJML components and provides
-      support for real‑time MJML compilation inside GrapesJS.  The file
-      exported by this package is named `index.js` rather than the more
-      common `*.min.js`, so be sure to reference `dist/index.js` here.
-    -->
-    <script src="https://cdn.jsdelivr.net/npm/grapesjs-mjml@1.0.7/dist/index.min.js"></script>
-
-    <!--
-      The GrapesJS Tailwind plugin is not used in this version.  All
-      Tailwind dependencies have been removed to simplify the setup.
-    -->
-
-    <!--
-      MJML browser compiler (v4.15.3).
-      The MJML compiler doesn’t ship a `dist` directory – instead the
-      compiled bundle lives in `lib/index.js`.  After loading this script
-      you get a global `mjml` function that can be used to compile
-      MJML strings to HTML.
-    -->
-    <script src="https://cdn.jsdelivr.net/npm/mjml-browser@4.15.3/lib/index.js"></script>
-
-    <!--
-      FileSaver helper (v2.0.5).
-      Included to enable saving MJML and HTML exports directly from the
-      browser.  If you don’t need download functionality you can remove this.
-    -->
-    <!--
-      Note: The FileSaver CDN file changed its SHA hash after release, which
-      broke the Subresource Integrity (SRI) check in some browsers.  To
-      prevent the browser from blocking the script we omit the integrity
-      attribute here.  See the console error in your browser for the
-      computed hash if you prefer to reintroduce SRI.
-    -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous"></script>
-
-    <!--
-      Base page styles.  The outer page of the editor no longer relies on
-      Tailwind via a remote CDN.  Instead, basic layout rules are defined
-      in assets/css/style.css.  Using our own styles avoids any cross‑origin
-      resource blocking errors and keeps the bundle self‑contained.
-    -->
-
-
-    <!-- Local custom styles for the outer page (optional). -->
-    <link rel="stylesheet" href="assets/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://grapesjs.com/assets/styles/grapesjs/grapesjs-preset-mjml.css"
+    />
+    <link rel="stylesheet" href="css/app.css" />
+    <script src="https://unpkg.com/grapesjs"></script>
+    <script src="https://unpkg.com/grapesjs-mjml"></script>
+    <script src="https://unpkg.com/mjml-browser@4.15.3/lib/index.js"></script>
   </head>
   <body>
-    <!--
-      GrapesJS will mount its editor inside this container.  We set a
-      full‑viewport height to make use of the entire page.  The
-      surrounding CSS in `assets/css/style.css` ensures this element
-      expands to fill the viewport without relying on any external
-      framework.
-    -->
-    <!--
-      The editor layout wraps a left sidebar together with the main canvas.
-      The sidebar hosts the Block Manager and Layer Manager, which we
-      explicitly append into their own containers via configuration in
-      `main.js`.  See the associated CSS rules in `style.css` for
-      sizing and positioning.
-    -->
-    <div class="editor-row">
-      <!-- Left panel: contains the block and layer managers.  Each
-           manager will render its UI inside the respective container
-           when the editor initialises. -->
-      <div id="left-panel">
-        <div id="blocks-container"></div>
-        <div id="layers-container"></div>
-      </div>
-      <!-- Main editor canvas.  GrapesJS will mount itself here. -->
-      <div id="gjs"></div>
+    <div id="gjs" style="height:0px; overflow:hidden">
+      <mjml>
+        <mj-head>
+          <mj-font
+            name="Barlow"
+            href="https://fonts.googleapis.com/css?family=Barlow"
+          ></mj-font>
+
+          <mj-style>
+            .slogan {
+              background: #000;
+            }
+          </mj-style>
+        </mj-head>
+        <mj-body>
+          <!-- Company Header -->
+          <mj-section background-color="#f0f0f0">
+            <mj-column border="10px solid #F45E43">
+              <mj-text font-family="Barlow">A first line of text</mj-text>
+              <mj-spacer height="50px" />
+            </mj-column>
+          </mj-section>
+
+          <!-- Image Header -->
+          <mj-section
+            background-url="http://1.bp.blogspot.com/-TPrfhxbYpDY/Uh3Refzk02I/AAAAAAAALw8/5sUJ0UUGYuw/s1600/New+York+in+The+1960's+-+70's+(2).jpg"
+            background-size="cover"
+            background-repeat="no-repeat"
+          >
+            <mj-column>
+              <mj-text
+                css-class="slogan"
+                align="center"
+                color="#fff"
+                font-size="40px"
+                font-family="Helvetica Neue"
+                >Slogan here</mj-text
+              >
+              <mj-button background-color="#F63A4D" href="#">
+                Promotion
+              </mj-button>
+            </mj-column>
+          </mj-section>
+
+          <!-- Intro text -->
+          <mj-wrapper background-color="#ffe9f7" padding="10px">
+            <mj-section background-color="#eaeffa">
+              <mj-group background-color="#fffadd">
+                <mj-column>
+                  <mj-text
+                    font-style="italic"
+                    font-size="20px"
+                    font-family="Helvetica Neue"
+                    color="#626262"
+                    >My Awesome Text</mj-text
+                  >
+                  <mj-text color="#525252">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Proin rutrum enim eget magna efficitur, eu semper augue
+                    semper. Aliquam erat volutpat. Cras id dui lectus.
+                    Vestibulum sed finibus lectus, sit amet suscipit nibh.
+                    Proin nec commodo purus. Sed eget nulla elit. Nulla aliquet
+                    mollis faucibus.
+                  </mj-text>
+                  <mj-button background-color="#F45E43" href="#"
+                    >Learn more</mj-button
+                  >
+                </mj-column>
+              </mj-group>
+            </mj-section>
+          </mj-wrapper>
+
+          <!-- Side image -->
+          <mj-section background-color="white">
+            <mj-column>
+              <mj-image
+                width="200px"
+                src="https://designspell.files.wordpress.com/2012/01/sciolino-paris-bw.jpg"
+              />
+            </mj-column>
+            <mj-column>
+              <mj-text
+                font-style="italic"
+                font-size="20px"
+                font-family="Helvetica Neue"
+                color="#626262"
+              >
+                Find amazing places ...
+              </mj-text>
+              <mj-text color="#525252">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin
+                rutrum enim eget magna efficitur, eu semper augue semper.
+                Aliquam erat volutpat. Cras id dui lectus. Vestibulum sed
+                finibus lectus.
+              </mj-text>
+            </mj-column>
+          </mj-section>
+          <mj-section>
+            <mj-column>
+              <mj-text
+                font-style="italic"
+                font-size="20px"
+                font-family="Helvetica Neue"
+                color="#626262"
+                align="center"
+              >
+                ... with real-life images
+              </mj-text>
+            </mj-column>
+          </mj-section>
+          <mj-raw>
+            <div class="container">
+              <img
+                class="item"
+                src="https://source.unsplash.com/random/200x141?random"
+                alt="Example image"
+              />
+              <img
+                class="item"
+                src="https://source.unsplash.com/random/200x142?random"
+                alt="Example image"
+              />
+              <img
+                class="item"
+                src="https://source.unsplash.com/random/200x143?random"
+                alt="Example image"
+              />
+              <img
+                class="item"
+                src="https://source.unsplash.com/random/200x144?random"
+                alt="Example image"
+              />
+              <img
+                class="item"
+                src="https://source.unsplash.com/random/200x145?random"
+                alt="Example image"
+              />
+              <img
+                class="item"
+                src="https://source.unsplash.com/random/200x146?random"
+                alt="Example image"
+              />
+            </div>
+          </mj-raw>
+          <!-- Icons -->
+          <mj-section background-color="#fbfbfb">
+            <mj-column>
+              <mj-image width="100px" src="http://191n.mj.am/img/191n/3s/x0l.png" />
+            </mj-column>
+            <mj-column>
+              <mj-image width="100px" src="http://191n.mj.am/img/191n/3s/x01.png" />
+            </mj-column>
+            <mj-column>
+              <mj-image width="100px" src="http://191n.mj.am/img/191n/3s/x0s.png" />
+            </mj-column>
+          </mj-section>
+
+          <!-- Footer -->
+          <mj-section background-color="#e7e7e7">
+            <mj-column>
+              <mj-button href="#">Hello There!</mj-button>
+              <mj-social font-size="15px" icon-size="30px" mode="horizontal">
+                <mj-social-element name="facebook" href="https://mjml.io/">
+                  Facebook
+                </mj-social-element>
+                <mj-social-element name="google" href="https://mjml.io/">
+                  Google
+                </mj-social-element>
+                <mj-social-element name="twitter" href="https://mjml.io/">
+                  Twitter
+                </mj-social-element>
+              </mj-social>
+            </mj-column>
+          </mj-section>
+          <!-- Footer -->
+        </mj-body>
+      </mjml>
     </div>
 
-    <!--
-      Main application logic: initialises GrapesJS, configures plugins,
-      registers custom blocks and commands, and handles export actions.
-      Instead of loading a local script, pull in the proven implementation
-      from the working email-editor example.  This remote file defines
-      default blocks, a preloaded MJML template, export buttons, and
-      mobile group column fixes.  It has been version‑pinned in
-      index.html comments.  The custom CSS in assets/css/style.css
-      remains in place to control the outer layout.  See
-      https://github.com/Mghetu/email-editor-GrapesJS for details.
-    -->
-    <script src="https://mghetu.github.io/email-editor-GrapesJS/assets/js/main.js"></script>
+    <script src="js/editor.js"></script>
   </body>
 </html>

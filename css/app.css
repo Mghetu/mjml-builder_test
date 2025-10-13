@@ -1,17 +1,31 @@
-:root{
-  --brand-color:#086bd4;
-  --brand-font: 'Aptos', Arial, Helvetica, sans-serif;
-  --brand-spacing:16px;
+html,
+body {
+  height: 100%;
+  margin: 0;
 }
 
-html, body { height: 100%; }
-body { font-family: var(--brand-font); }
+.cke_top {
+  background: #444 !important;
+}
 
-.gjs-one-bg{ background:#111; }
-.gjs-two-color{ color:#ddd; }
-.gjs-three-bg{ background:#1d1d1d; }
-.gjs-four-color{ color:#fff; }
-.gjs-pn-btn{ border-radius:8px; }
+.cke_chrome {
+  border: none !important;
+}
 
-/* Canvas background color (email stage) */
-#gjs { background:#0f172a; }
+.cke_toolgroup {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.gjs-blocks-c .gjs-block__media svg,
+.gjs-blocks-c .gjs-block__media img {
+  display: block;
+  max-width: 60%;
+  max-height: 60%;
+  margin: 0 auto;
+}
+
+.gjs-blocks-c .gjs-block__media {
+  background-size: 60% !important;
+}
