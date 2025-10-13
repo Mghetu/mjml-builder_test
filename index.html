@@ -17,7 +17,41 @@
     <script src="https://unpkg.com/mjml-browser@4.15.3/lib/index.js"></script>
   </head>
   <body>
-    <div id="gjs" style="height:0px; overflow:hidden">
+    <div class="custom-editor-with-sidebar">
+      <nav class="custom-left-sidebar" aria-label="Editor navigation">
+        <section
+          class="custom-left-sidebar__section custom-left-sidebar__section--blocks"
+          aria-labelledby="custom-left-sidebar-blocks"
+        >
+          <h2
+            id="custom-left-sidebar-blocks"
+            class="custom-left-sidebar__header"
+          >
+            Open Blocks
+          </h2>
+          <div
+            id="custom-blocks-container"
+            class="custom-left-sidebar__content"
+          ></div>
+        </section>
+        <section
+          class="custom-left-sidebar__section custom-left-sidebar__section--layers"
+          aria-labelledby="custom-left-sidebar-layers"
+        >
+          <h2
+            id="custom-left-sidebar-layers"
+            class="custom-left-sidebar__header"
+          >
+            Open Layer Manager
+          </h2>
+          <div
+            id="custom-layers-container"
+            class="custom-left-sidebar__content"
+          ></div>
+        </section>
+      </nav>
+      <div class="custom-editor-main">
+        <div id="gjs" style="height:0px; overflow:hidden">
       <mjml>
         <mj-head>
           <mj-font
@@ -194,6 +228,8 @@
           <!-- Footer -->
         </mj-body>
       </mjml>
+        </div>
+      </div>
     </div>
 
     <script src="js/editor.js"></script>
