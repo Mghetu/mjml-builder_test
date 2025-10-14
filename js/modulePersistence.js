@@ -4,7 +4,194 @@ const MODULES_KEY = 'mjmlModules';
 const MODULES_FALLBACK_KEY = 'mjmlModulesFallback';
 
 const DEFAULT_CATEGORY = 'Custom Modules';
+const DEFAULT_VERSION = 1;
 export const MODULES_CHANGED_EVENT = 'modules:changed';
+
+function toIsoString(value, fallback) {
+  if (value) {
+    const date = new Date(value);
+    if (!Number.isNaN(date.getTime())) {
+      return date.toISOString();
+    }
+  }
+
+  if (fallback) {
+    const fallbackDate = new Date(fallback);
+    if (!Number.isNaN(fallbackDate.getTime())) {
+      return fallbackDate.toISOString();
+    }
+  }
+
+  return new Date().toISOString();
+}
+
+function sanitizeModuleFields(moduleObj = {}) {
+  const { id, label, markup } = moduleObj;
+
+  if (!id || !label || !markup) {
+    throw new Error('Module definitions require id, label, and markup.');
+  }
+
+  const sanitized = {
+    id: String(id).trim(),
+    label: String(label).trim(),
+    category: moduleObj.category ? String(moduleObj.category).trim() : DEFAULT_CATEGORY,
+    markup: String(markup).trim()
+  };
+
+  if (moduleObj.thumbnail) {
+    sanitized.thumbnail = String(moduleObj.thumbnail).trim();
+  }
+
+  return sanitized;
+}
+
+function sanitizeMetadata(metadata, { defaultSavedAt, defaultUpdatedAt } = {}) {
+  const base = metadata && typeof metadata === 'object' ? { ...metadata } : {};
+
+  if (defaultSavedAt || base.savedAt) {
+    base.savedAt = toIsoString(base.savedAt, defaultSavedAt);
+  }
+
+  if (defaultUpdatedAt || base.updatedAt) {
+    base.updatedAt = toIsoString(
+      base.updatedAt,
+      defaultUpdatedAt || base.savedAt || defaultSavedAt
+    );
+  }
+
+  base.source = base.source || 'user';
+
+  return base;
+}
+
+function createHistorySnapshot(module) {
+  if (!module) {
+    return null;
+  }
+
+  try {
+    const baseFields = sanitizeModuleFields(module);
+    const updatedAt = toIsoString(
+      module.updatedAt,
+      module.metadata?.updatedAt || module.metadata?.savedAt
+    );
+    const metadata = sanitizeMetadata(module.metadata, {
+      defaultSavedAt: module.metadata?.savedAt || updatedAt,
+      defaultUpdatedAt: updatedAt
+    });
+
+    return {
+      ...baseFields,
+      metadata,
+      version:
+        Number.isInteger(module.version) && module.version > 0
+          ? module.version
+          : DEFAULT_VERSION,
+      updatedAt
+    };
+  } catch (error) {
+    console.warn(
+      `[ModulePersistence] Unable to snapshot module ${module?.id || ''}`,
+      error
+    );
+    return null;
+  }
+}
+
+function normalizeHistory(historyEntries, moduleSnapshot) {
+  if (!Array.isArray(historyEntries)) {
+    return [];
+  }
+
+  return historyEntries
+    .map((entry) => {
+      if (!entry) {
+        return null;
+      }
+
+      try {
+        const baseFields = sanitizeModuleFields({
+          ...moduleSnapshot,
+          ...entry,
+          id: moduleSnapshot.id
+        });
+        const updatedAt = toIsoString(
+          entry.updatedAt,
+          entry.metadata?.updatedAt || moduleSnapshot.updatedAt
+        );
+        const metadata = sanitizeMetadata(
+          { ...moduleSnapshot.metadata, ...(entry.metadata || {}) },
+          {
+            defaultSavedAt: moduleSnapshot.metadata?.savedAt,
+            defaultUpdatedAt: updatedAt
+          }
+        );
+
+        return {
+          ...baseFields,
+          metadata,
+          version:
+            Number.isInteger(entry.version) && entry.version > 0
+              ? entry.version
+              : DEFAULT_VERSION,
+          updatedAt
+        };
+      } catch (error) {
+        console.warn(
+          `[ModulePersistence] Ignoring invalid history entry for module ${moduleSnapshot.id}`,
+          error
+        );
+        return null;
+      }
+    })
+    .filter(Boolean);
+}
+
+function normalizeModuleRecord(rawModule) {
+  if (!rawModule) {
+    return null;
+  }
+
+  try {
+    const baseFields = sanitizeModuleFields(rawModule);
+    const now = new Date().toISOString();
+    const updatedAt = toIsoString(
+      rawModule.updatedAt,
+      rawModule.metadata?.updatedAt || rawModule.metadata?.savedAt || now
+    );
+    const metadata = sanitizeMetadata(rawModule.metadata, {
+      defaultSavedAt: rawModule.metadata?.savedAt || updatedAt,
+      defaultUpdatedAt: updatedAt
+    });
+
+    return {
+      ...baseFields,
+      metadata,
+      version:
+        Number.isInteger(rawModule.version) && rawModule.version > 0
+          ? rawModule.version
+          : DEFAULT_VERSION,
+      updatedAt,
+      history: normalizeHistory(rawModule.history, {
+        ...baseFields,
+        metadata,
+        updatedAt
+      })
+    };
+  } catch (error) {
+    console.warn('[ModulePersistence] Ignoring invalid module definition while loading.', error);
+    return null;
+  }
+}
+
+function normalizeModulesCollection(modules) {
+  if (!Array.isArray(modules)) {
+    return [];
+  }
+
+  return modules.map(normalizeModuleRecord).filter(Boolean);
+}
 
 function ensureWindow() {
   if (typeof window === 'undefined') {
@@ -119,74 +306,112 @@ function fetchFromIndexedDb() {
   );
 }
 
-function sanitizeModuleDefinition(moduleObj = {}) {
-  const { id, label, category, markup, thumbnail, metadata = {} } = moduleObj;
-
-  if (!id || !label || !markup) {
-    throw new Error('Module definitions require id, label, and markup.');
-  }
-
-  const sanitized = {
-    id: String(id).trim(),
-    label: String(label).trim(),
-    category: category ? String(category).trim() : DEFAULT_CATEGORY,
-    markup: String(markup).trim(),
-    metadata: { ...metadata }
-  };
-
-  if (thumbnail) {
-    sanitized.thumbnail = String(thumbnail).trim();
-  }
-
-  if (!sanitized.metadata.savedAt) {
-    sanitized.metadata.savedAt = new Date().toISOString();
-  }
-
-  sanitized.metadata.source = sanitized.metadata.source || 'user';
-
-  return sanitized;
-}
-
 export async function loadBlocks() {
   try {
     const modules = await fetchFromIndexedDb();
-    return Array.isArray(modules) ? modules : [];
+    return normalizeModulesCollection(modules);
   } catch (error) {
     console.warn('[ModulePersistence] Falling back to localStorage for load.', error);
-    return readFromLocalStorage();
+    return normalizeModulesCollection(readFromLocalStorage());
   }
 }
 
 export async function saveBlock(moduleObj) {
-  const sanitized = sanitizeModuleDefinition(moduleObj);
   const existingModules = await loadBlocks();
+  const existingIndex = existingModules.findIndex(
+    (module) => module && module.id === moduleObj.id
+  );
+  const existingModule = existingIndex >= 0 ? existingModules[existingIndex] : null;
+  const now = new Date().toISOString();
+  const sanitizedFields = sanitizeModuleFields(
+    existingModule ? { ...existingModule, ...moduleObj } : moduleObj
+  );
+  const metadata = sanitizeMetadata(
+    existingModule
+      ? { ...existingModule.metadata, ...(moduleObj.metadata || {}) }
+      : moduleObj.metadata,
+    {
+      defaultSavedAt: existingModule?.metadata?.savedAt || now,
+      defaultUpdatedAt: now
+    }
+  );
 
-  const modules = existingModules.filter((module) => module && module.id !== sanitized.id);
-  modules.push(sanitized);
+  let modules;
+
+  if (existingModule) {
+    const history = [
+      createHistorySnapshot(existingModule),
+      ...(existingModule.history || [])
+    ].filter(Boolean);
+
+    const updatedModule = {
+      ...existingModule,
+      ...sanitizedFields,
+      metadata,
+      version:
+        (existingModule.version && existingModule.version > 0
+          ? existingModule.version
+          : DEFAULT_VERSION) + 1,
+      updatedAt: now,
+      history
+    };
+
+    modules = existingModules.slice();
+    modules[existingIndex] = updatedModule;
+  } else {
+    const newModule = {
+      ...sanitizedFields,
+      metadata,
+      version: DEFAULT_VERSION,
+      updatedAt: now,
+      history: []
+    };
+
+    modules = [...existingModules, newModule];
+  }
 
   return persistModules(modules);
 }
 
 export async function updateBlock(moduleObj) {
   const existingModules = await loadBlocks();
-  const existingModule = existingModules.find((module) => module && module.id === moduleObj.id);
+  const existingIndex = existingModules.findIndex(
+    (module) => module && module.id === moduleObj.id
+  );
+  const existingModule = existingIndex >= 0 ? existingModules[existingIndex] : null;
 
   if (!existingModule) {
     throw new Error('Cannot update module: definition not found.');
   }
 
-  const sanitized = sanitizeModuleDefinition({
-    ...existingModule,
-    ...moduleObj,
-    metadata: { ...existingModule.metadata, ...(moduleObj.metadata || {}) }
-  });
-
-  sanitized.metadata.savedAt = existingModule.metadata?.savedAt || sanitized.metadata.savedAt;
-  sanitized.metadata.updatedAt = new Date().toISOString();
-
-  const modules = existingModules.map((module) =>
-    module && module.id === sanitized.id ? sanitized : module
+  const now = new Date().toISOString();
+  const sanitizedFields = sanitizeModuleFields({ ...existingModule, ...moduleObj });
+  const metadata = sanitizeMetadata(
+    { ...existingModule.metadata, ...(moduleObj.metadata || {}) },
+    {
+      defaultSavedAt: existingModule.metadata?.savedAt || now,
+      defaultUpdatedAt: now
+    }
   );
+  const history = [
+    createHistorySnapshot(existingModule),
+    ...(existingModule.history || [])
+  ].filter(Boolean);
+
+  const updatedModule = {
+    ...existingModule,
+    ...sanitizedFields,
+    metadata,
+    version:
+      (existingModule.version && existingModule.version > 0
+        ? existingModule.version
+        : DEFAULT_VERSION) + 1,
+    updatedAt: now,
+    history
+  };
+
+  const modules = existingModules.slice();
+  modules[existingIndex] = updatedModule;
 
   return persistModules(modules);
 }
