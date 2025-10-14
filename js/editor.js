@@ -21,6 +21,10 @@
     window.editor.on('load', function() {
       window.editor.BlockManager.render();
       window.editor.LayerManager.render();
+
+      // Close the default GrapesJS block panel opened by the `open-blocks` command
+      // so only the custom blocks sidebar remains visible.
+      window.editor.Commands.stop('open-blocks');
     });
   });
 })();
