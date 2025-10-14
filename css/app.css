@@ -182,11 +182,23 @@ body {
   pointer-events: none;
   font-size: 14px;
   line-height: 1.4;
+  background-color: rgba(30, 41, 59, 0.96);
+  color: #f8fafc;
+}
+
+.toast--info {
+  background-color: rgba(30, 41, 59, 0.96);
+  color: #f8fafc;
 }
 
 .toast--error {
   background-color: #b91c1c;
   color: #fef2f2;
+}
+
+.toast--success {
+  background-color: #047857;
+  color: #ecfdf5;
 }
 
 .toast--visible {
