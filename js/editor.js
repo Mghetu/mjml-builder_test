@@ -1,8 +1,152 @@
+import addCustomBlocks from './custom-blocks.js';
+import { loadBlocks, saveBlock } from './modulePersistence.js';
 import { showToast } from './toast.js';
 
 const STORAGE_TOAST_ID = 'storage-status-toast';
 const STORE_TOAST_INTERVAL = 15000;
 let lastStoreToastAt = 0;
+
+const SAVE_BLOCK_BUTTON_ID = 'save-custom-block-btn';
+const DEFAULT_BLOCK_CATEGORY = 'Custom Modules';
+
+const slugify = (value = '') =>
+  value
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '')
+    .slice(0, 60) || 'custom-block';
+
+const getSelectedMarkup = (editor) => {
+  const selected = editor.getSelected();
+  if (!selected) {
+    return null;
+  }
+
+  if (typeof selected.toHTML === 'function') {
+    return selected.toHTML();
+  }
+
+  if (typeof selected.toString === 'function') {
+    return selected.toString();
+  }
+
+  return null;
+};
+
+async function initialiseCustomBlocks(editor) {
+  try {
+    addCustomBlocks(editor);
+  } catch (error) {
+    console.error('[CustomBlocks] Failed to register default modules', error);
+  }
+
+  try {
+    const savedModules = await loadBlocks();
+    if (Array.isArray(savedModules) && savedModules.length) {
+      addCustomBlocks(editor, savedModules);
+    }
+  } catch (error) {
+    console.error('[CustomBlocks] Failed to restore saved modules', error);
+  }
+}
+
+function setupSaveBlockButton(editor) {
+  const saveButton = document.getElementById(SAVE_BLOCK_BUTTON_ID);
+  if (!saveButton) {
+    return;
+  }
+
+  saveButton.addEventListener('click', async () => {
+    const selected = editor.getSelected();
+
+    if (!selected) {
+      showToast({
+        id: 'save-block-feedback',
+        message: 'Select a component in the canvas to save it as a block.',
+        variant: 'error',
+        duration: 3500,
+      });
+      return;
+    }
+
+    const markup = getSelectedMarkup(editor);
+
+    if (!markup) {
+      showToast({
+        id: 'save-block-feedback',
+        message: 'Unable to serialise the selected component. Try another element.',
+        variant: 'error',
+        duration: 4000,
+      });
+      return;
+    }
+
+    const suggestedLabel =
+      selected.get('custom-name') ||
+      (typeof selected.getName === 'function' && selected.getName()) ||
+      'Custom Block';
+
+    const label = window.prompt('Enter a label for this block', suggestedLabel);
+    if (!label) {
+      return;
+    }
+
+    const suggestedId = `custom-${slugify(label)}`;
+    const id = window.prompt('Enter a unique identifier for this block', suggestedId);
+    if (!id) {
+      return;
+    }
+
+    const category = window.prompt(
+      'Enter a category for this block (optional)',
+      DEFAULT_BLOCK_CATEGORY
+    );
+
+    const thumbnail = window.prompt(
+      'Enter a thumbnail URL for this block (optional)',
+      ''
+    );
+
+    const moduleDefinition = {
+      id: id.trim(),
+      label: label.trim(),
+      category: category ? category.trim() : DEFAULT_BLOCK_CATEGORY,
+      markup: markup.trim(),
+      metadata: {
+        savedFrom: 'editor',
+      },
+    };
+
+    if (thumbnail && thumbnail.trim()) {
+      moduleDefinition.thumbnail = thumbnail.trim();
+    }
+
+    saveButton.disabled = true;
+
+    try {
+      await saveBlock(moduleDefinition);
+      addCustomBlocks(editor, [moduleDefinition]);
+      showToast({
+        id: 'save-block-feedback',
+        message: 'Block saved to your library.',
+        variant: 'success',
+        duration: 2500,
+      });
+    } catch (error) {
+      console.error('[CustomBlocks] Failed to save module', error);
+      showToast({
+        id: 'save-block-feedback',
+        message: 'Unable to save block. Check the console for details.',
+        variant: 'error',
+        duration: 4500,
+      });
+    } finally {
+      saveButton.disabled = false;
+    }
+  });
+}
 
 function configureStorageEvents(editor) {
   const logEvent = (eventName) => (...payload) => {
@@ -80,6 +224,8 @@ export function initEditor() {
   });
 
   configureStorageEvents(window.editor);
+  initialiseCustomBlocks(window.editor);
+  setupSaveBlockButton(window.editor);
 
   window.editor.on('load', function () {
     window.editor.BlockManager.render();
