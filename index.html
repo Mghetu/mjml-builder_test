@@ -44,6 +44,20 @@
           ></div>
         </section>
         <section
+          class="custom-left-sidebar__section custom-left-sidebar__section--modules"
+          aria-labelledby="custom-left-sidebar-modules"
+        >
+          <h2
+            id="custom-left-sidebar-modules"
+            class="custom-left-sidebar__header"
+          >
+            My Modules
+          </h2>
+          <div class="custom-left-sidebar__content">
+            <div id="user-modules-list" class="module-list" aria-live="polite"></div>
+          </div>
+        </section>
+        <section
           class="custom-left-sidebar__section custom-left-sidebar__section--layers"
           aria-labelledby="custom-left-sidebar-layers"
         >
@@ -240,6 +254,50 @@
         </div>
       </div>
     </div>
+
+    <dialog id="module-edit-dialog" class="module-edit-dialog" aria-labelledby="module-edit-title">
+      <form id="module-edit-form" class="module-edit-dialog__form">
+        <h3 id="module-edit-title" class="module-edit-dialog__title">Edit Module</h3>
+        <div class="module-edit-dialog__field">
+          <label class="module-edit-dialog__label" for="module-edit-name">Name</label>
+          <input
+            id="module-edit-name"
+            name="module-edit-name"
+            class="module-edit-dialog__input"
+            type="text"
+            required
+            maxlength="120"
+          />
+        </div>
+        <div class="module-edit-dialog__field">
+          <label class="module-edit-dialog__label" for="module-edit-category">Category</label>
+          <input
+            id="module-edit-category"
+            name="module-edit-category"
+            class="module-edit-dialog__input"
+            type="text"
+            placeholder="Custom Modules"
+          />
+        </div>
+        <div class="module-edit-dialog__field">
+          <label class="module-edit-dialog__label" for="module-edit-markup">Markup</label>
+          <textarea
+            id="module-edit-markup"
+            name="module-edit-markup"
+            class="module-edit-dialog__textarea"
+            required
+          ></textarea>
+        </div>
+        <div class="module-edit-dialog__actions">
+          <button type="button" data-action="cancel" class="module-edit-dialog__button">
+            Cancel
+          </button>
+          <button type="submit" class="module-edit-dialog__button module-edit-dialog__button--primary">
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </dialog>
 
     <script type="module" src="js/main.js"></script>
   </body>

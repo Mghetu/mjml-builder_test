@@ -1,6 +1,7 @@
 import addCustomBlocks from './custom-blocks.js';
 import { loadBlocks, saveBlock } from './modulePersistence.js';
 import { showToast } from './toast.js';
+import { initModuleManagerUI } from './moduleManagerUI.js';
 
 const STORAGE_TOAST_ID = 'storage-status-toast';
 const STORE_TOAST_INTERVAL = 15000;
@@ -128,6 +129,7 @@ function setupSaveBlockButton(editor) {
     try {
       await saveBlock(moduleDefinition);
       addCustomBlocks(editor, [moduleDefinition]);
+      editor.BlockManager.render();
       showToast({
         id: 'save-block-feedback',
         message: 'Block saved to your library.',
@@ -226,6 +228,7 @@ export function initEditor() {
   configureStorageEvents(window.editor);
   initialiseCustomBlocks(window.editor);
   setupSaveBlockButton(window.editor);
+  initModuleManagerUI(window.editor);
 
   window.editor.on('load', function () {
     window.editor.BlockManager.render();
