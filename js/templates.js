@@ -1,5 +1,7 @@
+import { Theme } from './themes.js';
+
 // Data-URI placeholder image to satisfy CSP (img-src 'self' data:)
-const DATA_HERO = "data:image/svg+xml;utf8," + encodeURIComponent(`
+export const DATA_HERO = "data:image/svg+xml;utf8," + encodeURIComponent(`
   <svg xmlns='http://www.w3.org/2000/svg' width='800' height='300'>
     <defs>
       <linearGradient id='g' x1='0' x2='1'>
@@ -15,7 +17,7 @@ const DATA_HERO = "data:image/svg+xml;utf8," + encodeURIComponent(`
   </svg>
 `);
 
-window.SampleTemplates = {
+export const SampleTemplates = {
   productNewsletter: {
     name: 'Product Newsletter',
     mjml: `
@@ -124,3 +126,5 @@ window.SampleTemplates = {
 `.trim()
   }
 };
+
+export default SampleTemplates;
