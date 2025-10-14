@@ -14,12 +14,28 @@ const EDIT_NAME_ID = 'module-edit-name';
 const EDIT_CATEGORY_ID = 'module-edit-category';
 const EDIT_MARKUP_ID = 'module-edit-markup';
 const FALLBACK_CATEGORY = 'Custom Modules';
+const VERSIONS_DIALOG_ID = 'module-versions-dialog';
+const VERSIONS_DESCRIPTION_ID = 'module-versions-description';
+const VERSIONS_BODY_ID = 'module-versions-body';
 
 function createEmptyState() {
   const emptyState = document.createElement('p');
   emptyState.className = 'module-list__empty';
   emptyState.textContent = 'Saved modules will appear here.';
   return emptyState;
+}
+
+function formatTimestamp(timestamp) {
+  if (!timestamp) {
+    return 'Unknown date';
+  }
+
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) {
+    return 'Unknown date';
+  }
+
+  return date.toLocaleString();
 }
 
 function buildThumbnail(module) {
@@ -72,9 +88,14 @@ export function initModuleManagerUI(editor) {
   const categoryInput = document.getElementById(EDIT_CATEGORY_ID);
   const markupInput = document.getElementById(EDIT_MARKUP_ID);
   const cancelButton = dialog?.querySelector('[data-action="cancel"]');
+  const versionsDialog = document.getElementById(VERSIONS_DIALOG_ID);
+  const versionsDescription = document.getElementById(VERSIONS_DESCRIPTION_ID);
+  const versionsBody = document.getElementById(VERSIONS_BODY_ID);
+  const versionsCloseButton = versionsDialog?.querySelector('[data-action="close"]');
 
   let modules = [];
   let editingModuleId = null;
+  let viewingVersionsFor = null;
 
   const closeDialog = () => {
     if (dialog && dialog.open) {
@@ -86,6 +107,103 @@ export function initModuleManagerUI(editor) {
     }
 
     editingModuleId = null;
+  };
+
+  const closeVersionsDialog = () => {
+    if (versionsDialog && versionsDialog.open) {
+      versionsDialog.close();
+    }
+
+    if (versionsBody) {
+      versionsBody.innerHTML = '';
+    }
+
+    if (versionsDescription) {
+      versionsDescription.textContent = '';
+    }
+
+    viewingVersionsFor = null;
+  };
+
+  const renderVersionHistory = (module) => {
+    if (!versionsBody) {
+      return;
+    }
+
+    versionsBody.innerHTML = '';
+
+    const history = Array.isArray(module.history) ? module.history : [];
+
+    if (!history.length) {
+      const empty = document.createElement('p');
+      empty.className = 'module-versions-dialog__empty';
+      empty.textContent = 'This module does not have any previous versions yet.';
+      versionsBody.appendChild(empty);
+      return;
+    }
+
+    history.forEach((entry) => {
+      const item = document.createElement('article');
+      item.className = 'module-versions-dialog__version';
+      item.setAttribute('role', 'listitem');
+
+      const header = document.createElement('div');
+      header.className = 'module-versions-dialog__version-header';
+
+      const title = document.createElement('span');
+      title.className = 'module-versions-dialog__version-title';
+      title.textContent = `Version ${entry.version || 1}`;
+
+      const meta = document.createElement('span');
+      meta.className = 'module-versions-dialog__version-meta';
+      const category = entry.category || FALLBACK_CATEGORY;
+      meta.textContent = `${formatTimestamp(entry.updatedAt)} • ${category}`;
+
+      header.appendChild(title);
+      header.appendChild(meta);
+      item.appendChild(header);
+
+      const labelRow = document.createElement('p');
+      labelRow.className = 'module-versions-dialog__version-label';
+      labelRow.textContent = `Label: ${entry.label}`;
+      item.appendChild(labelRow);
+
+      const markupBlock = document.createElement('pre');
+      markupBlock.className = 'module-versions-dialog__markup';
+      markupBlock.textContent = entry.markup;
+      item.appendChild(markupBlock);
+
+      versionsBody.appendChild(item);
+    });
+  };
+
+  const openVersionsDialog = (module) => {
+    const history = Array.isArray(module.history) ? module.history : [];
+
+    if (!versionsDialog || typeof versionsDialog.showModal !== 'function') {
+      if (!history.length) {
+        window.alert('No previous versions available for this module yet.');
+        return;
+      }
+
+      const summary = history
+        .map(
+          (entry) =>
+            `Version ${entry.version || 1} (${formatTimestamp(entry.updatedAt)}):\n${entry.markup}`
+        )
+        .join('\n\n');
+      window.alert(summary);
+      return;
+    }
+
+    viewingVersionsFor = module.id;
+
+    if (versionsDescription) {
+      versionsDescription.textContent = `Viewing history for "${module.label}". Current version v${module.version || 1} • Updated ${formatTimestamp(module.updatedAt)}.`;
+    }
+
+    renderVersionHistory(module);
+    versionsDialog.showModal();
   };
 
   const openEditDialog = (module) => {
@@ -154,7 +272,9 @@ export function initModuleManagerUI(editor) {
 
       const meta = document.createElement('span');
       meta.className = 'module-list__meta';
-      meta.textContent = module.category || FALLBACK_CATEGORY;
+      const versionNumber = module.version || 1;
+      const category = module.category || FALLBACK_CATEGORY;
+      meta.textContent = `Version ${versionNumber} • ${category}`;
 
       info.appendChild(label);
       info.appendChild(meta);
@@ -164,6 +284,16 @@ export function initModuleManagerUI(editor) {
 
       const actions = document.createElement('div');
       actions.className = 'module-list__actions';
+
+      const versionsButton = document.createElement('button');
+      versionsButton.type = 'button';
+      versionsButton.className = 'module-list__action';
+      versionsButton.textContent = 'Versions';
+      versionsButton.setAttribute('aria-label', `View versions of ${module.label}`);
+      versionsButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        openVersionsDialog(module);
+      });
 
       const editButton = document.createElement('button');
       editButton.type = 'button';
@@ -207,6 +337,7 @@ export function initModuleManagerUI(editor) {
         }
       });
 
+      actions.appendChild(versionsButton);
       actions.appendChild(editButton);
       actions.appendChild(deleteButton);
 
@@ -216,6 +347,18 @@ export function initModuleManagerUI(editor) {
     });
 
     listContainer.appendChild(listElement);
+
+    if (viewingVersionsFor && versionsDialog?.open) {
+      const activeModule = modules.find((module) => module.id === viewingVersionsFor);
+      if (activeModule) {
+        if (versionsDescription) {
+          versionsDescription.textContent = `Viewing history for "${activeModule.label}". Current version v${activeModule.version || 1} • Updated ${formatTimestamp(activeModule.updatedAt)}.`;
+        }
+        renderVersionHistory(activeModule);
+      } else {
+        closeVersionsDialog();
+      }
+    }
   };
 
   async function handleModuleUpdate(updatedDefinition) {
@@ -294,6 +437,21 @@ export function initModuleManagerUI(editor) {
   if (dialog) {
     dialog.addEventListener('cancel', closeDialog);
     dialog.addEventListener('close', closeDialog);
+  }
+
+  if (versionsCloseButton) {
+    versionsCloseButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      closeVersionsDialog();
+    });
+  }
+
+  if (versionsDialog) {
+    versionsDialog.addEventListener('cancel', (event) => {
+      event.preventDefault();
+      closeVersionsDialog();
+    });
+    versionsDialog.addEventListener('close', closeVersionsDialog);
   }
 
   const refreshModules = async () => {

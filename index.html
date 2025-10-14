@@ -299,6 +299,38 @@
       </form>
     </dialog>
 
+    <dialog
+      id="module-versions-dialog"
+      class="module-versions-dialog"
+      aria-labelledby="module-versions-title"
+    >
+      <div class="module-versions-dialog__content">
+        <header class="module-versions-dialog__header">
+          <h3 id="module-versions-title" class="module-versions-dialog__title">
+            Module Versions
+          </h3>
+          <p
+            id="module-versions-description"
+            class="module-versions-dialog__description"
+          ></p>
+        </header>
+        <div
+          id="module-versions-body"
+          class="module-versions-dialog__body"
+          role="list"
+        ></div>
+        <footer class="module-versions-dialog__footer">
+          <button
+            type="button"
+            data-action="close"
+            class="module-versions-dialog__button module-versions-dialog__button--primary"
+          >
+            Close
+          </button>
+        </footer>
+      </div>
+    </dialog>
+
     <script type="module" src="js/main.js"></script>
   </body>
 </html>

@@ -127,8 +127,11 @@ function setupSaveBlockButton(editor) {
     saveButton.disabled = true;
 
     try {
-      await saveBlock(moduleDefinition);
-      addCustomBlocks(editor, [moduleDefinition]);
+      const persistedModules = await saveBlock(moduleDefinition);
+      const savedModule = Array.isArray(persistedModules)
+        ? persistedModules.find((module) => module.id === moduleDefinition.id)
+        : null;
+      addCustomBlocks(editor, [savedModule || moduleDefinition]);
       editor.BlockManager.render();
       showToast({
         id: 'save-block-feedback',
