@@ -117,6 +117,20 @@ body {
   border-radius: 8px;
 }
 
+#custom-blocks-container {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+#custom-blocks-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+#custom-blocks-container::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
 .custom-left-sidebar__section--blocks .gjs-blocks-c {
   flex: 1;
   display: grid;
