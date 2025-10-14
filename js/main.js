@@ -9,3 +9,4 @@ export * from './storage.js';
 export * from './imageStore.js';
 export * from './themes.js';
 export * from './templates.js';
+export * from './modulePersistence.js';

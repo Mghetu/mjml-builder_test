@@ -86,6 +86,10 @@ const normalizeModules = (modules = []) =>
 const addModuleToBlockManager = (blockManager, moduleDefinition) => {
   const { id, label, category, markup, thumbnail, metadata } = moduleDefinition;
 
+  if (blockManager.get(id)) {
+    blockManager.remove(id);
+  }
+
   blockManager.add(id, {
     label,
     category,
