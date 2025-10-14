@@ -4,6 +4,7 @@ const MODULES_KEY = 'mjmlModules';
 const MODULES_FALLBACK_KEY = 'mjmlModulesFallback';
 
 const DEFAULT_CATEGORY = 'Custom Modules';
+export const MODULES_CHANGED_EVENT = 'modules:changed';
 
 function ensureWindow() {
   if (typeof window === 'undefined') {
@@ -34,6 +35,18 @@ function openModulesDb() {
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error || new Error('Failed to open modules database.'));
   });
+}
+
+function broadcastModulesChanged(modules) {
+  try {
+    const win = ensureWindow();
+    const event = new CustomEvent(MODULES_CHANGED_EVENT, {
+      detail: { modules: Array.isArray(modules) ? modules : [] }
+    });
+    win.dispatchEvent(event);
+  } catch (error) {
+    console.warn('[ModulePersistence] Failed to broadcast module changes', error);
+  }
 }
 
 function readFromLocalStorage() {
@@ -72,6 +85,20 @@ function persistToIndexedDb(modules) {
       request.onerror = () => reject(request.error);
     })
   );
+}
+
+async function persistModules(modules) {
+  let persistedModules = modules;
+
+  try {
+    await persistToIndexedDb(modules);
+  } catch (error) {
+    console.warn('[ModulePersistence] Falling back to localStorage.', error);
+    persistedModules = writeToLocalStorage(modules);
+  }
+
+  broadcastModulesChanged(persistedModules);
+  return persistedModules;
 }
 
 function fetchFromIndexedDb() {
@@ -137,16 +164,51 @@ export async function saveBlock(moduleObj) {
   const modules = existingModules.filter((module) => module && module.id !== sanitized.id);
   modules.push(sanitized);
 
-  try {
-    await persistToIndexedDb(modules);
-    return modules;
-  } catch (error) {
-    console.warn('[ModulePersistence] Falling back to localStorage for save.', error);
-    return writeToLocalStorage(modules);
+  return persistModules(modules);
+}
+
+export async function updateBlock(moduleObj) {
+  const existingModules = await loadBlocks();
+  const existingModule = existingModules.find((module) => module && module.id === moduleObj.id);
+
+  if (!existingModule) {
+    throw new Error('Cannot update module: definition not found.');
   }
+
+  const sanitized = sanitizeModuleDefinition({
+    ...existingModule,
+    ...moduleObj,
+    metadata: { ...existingModule.metadata, ...(moduleObj.metadata || {}) }
+  });
+
+  sanitized.metadata.savedAt = existingModule.metadata?.savedAt || sanitized.metadata.savedAt;
+  sanitized.metadata.updatedAt = new Date().toISOString();
+
+  const modules = existingModules.map((module) =>
+    module && module.id === sanitized.id ? sanitized : module
+  );
+
+  return persistModules(modules);
+}
+
+export async function deleteBlock(moduleId) {
+  if (!moduleId) {
+    throw new Error('Cannot delete module without an identifier.');
+  }
+
+  const existingModules = await loadBlocks();
+  const modules = existingModules.filter((module) => module && module.id !== moduleId);
+
+  if (modules.length === existingModules.length) {
+    throw new Error('Module not found.');
+  }
+
+  return persistModules(modules);
 }
 
 export default {
   saveBlock,
-  loadBlocks
+  loadBlocks,
+  updateBlock,
+  deleteBlock
 };

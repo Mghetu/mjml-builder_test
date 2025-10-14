@@ -99,6 +99,17 @@ const addModuleToBlockManager = (blockManager, moduleDefinition) => {
   });
 };
 
+export function removeModuleFromBlockManager(editor, moduleId) {
+  if (!editor || !editor.BlockManager || !moduleId) {
+    return;
+  }
+
+  const blockManager = editor.BlockManager;
+  if (blockManager.get(moduleId)) {
+    blockManager.remove(moduleId);
+  }
+}
+
 export default function addCustomBlocks(editor, modules = ExampleModules) {
   if (!editor || !editor.BlockManager) {
     throw new Error('A valid GrapesJS editor instance with a BlockManager is required.');
