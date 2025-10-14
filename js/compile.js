@@ -1,27 +1,16 @@
 import StorageProvider from './storage.js';
+import { showToast } from './toast.js';
 
 const TOAST_ID = 'compile-error-toast';
 
-function ensureToast() {
-  let toast = document.getElementById(TOAST_ID);
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = TOAST_ID;
-    toast.className = 'toast toast--error';
-    toast.setAttribute('role', 'alert');
-    document.body.appendChild(toast);
-  }
-  return toast;
-}
-
 function showCompileError(message) {
-  const toast = ensureToast();
-  toast.textContent = message;
-  toast.classList.add('toast--visible');
-  clearTimeout(showCompileError.timeoutId);
-  showCompileError.timeoutId = setTimeout(() => {
-    toast.classList.remove('toast--visible');
-  }, 5000);
+  showToast({
+    id: TOAST_ID,
+    message,
+    variant: 'error',
+    duration: 5000,
+    role: 'alert',
+  });
 }
 
 function getMjmlRuntime() {
